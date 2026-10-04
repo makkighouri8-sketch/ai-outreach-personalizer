@@ -6,7 +6,7 @@ import google.generativeai as genai
 
 app = Flask(__name__)
 
-# Configure Gemini API
+# Configure Gemini API Key
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
@@ -96,11 +96,12 @@ HTML_TEMPLATE = """
         .dot-flashing {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
+            padding: 10px 0;
         }
         .dot-flashing span {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
             background-color: #a1a1aa;
             border-radius: 50%;
             animation: dotPulse 1.4s infinite ease-in-out both;
@@ -157,21 +158,23 @@ HTML_TEMPLATE = """
                 </div>
             </div>
 
-            <!-- Right Panel: Clean Output without Inner Box -->
+            <!-- Right Panel: Clean Output Display -->
             <div class="bg-cardBg border border-borderClr rounded-xl p-6 flex flex-col justify-between shadow-2xl min-h-[320px]">
                 <div>
                     <h2 class="text-sm font-semibold text-zinc-300 uppercase tracking-wider mb-4 flex items-center">
                         <span class="mr-2">⚡</span> AI Generated Output
                     </h2>
                     
-                    <!-- Clean, natural text display -->
                     <div id="output" class="text-zinc-200 text-base leading-relaxed whitespace-pre-wrap font-sans">
                         Result will appear here...
                     </div>
                 </div>
-                <div class="mt-6 flex justify-end">
-                    <button onclick="copyText()" class="text-xs text-zinc-400 hover:text-white flex items-center space-x-1">
-                        <span>📋 Copy Output</span>
+                <div class="mt-6 flex justify-end space-x-4 border-t border-zinc-800/60 pt-3">
+                    <button onclick="copyText()" id="copyBtn" class="text-xs text-zinc-400 hover:text-white transition">
+                        📋 Copy Output
+                    </button>
+                    <button onclick="downloadText()" class="text-xs text-zinc-400 hover:text-white transition">
+                        📥 Download TXT
                     </button>
                 </div>
             </div>
@@ -224,8 +227,24 @@ HTML_TEMPLATE = """
         function copyText() {
             const text = document.getElementById('output').innerText;
             if(!text || text === 'Result will appear here...') return;
+            
             navigator.clipboard.writeText(text);
-            alert('Copied to clipboard!');
+            const copyBtn = document.getElementById('copyBtn');
+            copyBtn.innerText = '✓ Copied!';
+            setTimeout(() => {
+                copyBtn.innerText = '📋 Copy Output';
+            }, 2000);
+        }
+
+        function downloadText() {
+            const text = document.getElementById('output').innerText;
+            if(!text || text === 'Result will appear here...') return;
+            
+            const blob = new Blob([text], { type: 'text/plain' });
+            const anchor = document.createElement('a');
+            anchor.href = URL.createObjectURL(blob);
+            anchor.download = 'outreach_email.txt';
+            anchor.click();
         }
     </script>
 </body>
