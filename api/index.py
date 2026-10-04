@@ -19,10 +19,9 @@ def scrape_website(url):
         response = requests.get(url, headers=headers, timeout=5)
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        # Extract title and paragraph content
         title = soup.title.string if soup.title else ""
         paragraphs = [p.get_text() for p in soup.find_all('p')]
-        text_content = ' '.join(paragraphs[:5]) # Top 5 paragraphs
+        text_content = ' '.join(paragraphs[:5])
         return f"Title: {title}. Context: {text_content[:800]}"
     except Exception as e:
         return f"Website content summary: Tech company in B2B sector."
@@ -60,7 +59,6 @@ def generate():
 
     try:
         if not GEMINI_API_KEY:
-            # Fallback response for demo mode
             email_output = f"Subject: quick thought on {prospect_url}\n\nHi there,\n\nNoticed your work at {prospect_url}. Most {prospect_role}s are currently struggling to streamline operations.\n\nWe help companies scale faster using {my_offer}.\n\nWorth a brief 5-min chat this week?"
         else:
             model = genai.GenerativeModel('gemini-2.5-flash')
@@ -71,7 +69,6 @@ def generate():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Embedded HTML/Tailwind OLED Interface
 HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="en" class="dark">
@@ -95,6 +92,26 @@ HTML_TEMPLATE = """
             }
         }
     </script>
+    <style>
+        .dot-flashing {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .dot-flashing span {
+            width: 6px;
+            height: 6px;
+            background-color: #a1a1aa;
+            border-radius: 50%;
+            animation: dotPulse 1.4s infinite ease-in-out both;
+        }
+        .dot-flashing span:nth-child(1) { animation-delay: -0.32s; }
+        .dot-flashing span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes dotPulse {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+    </style>
 </head>
 <body class="bg-oled text-zinc-100 min-h-screen flex flex-col justify-between font-sans antialiased">
     
@@ -107,9 +124,9 @@ HTML_TEMPLATE = """
         <span class="text-xs bg-zinc-800 text-zinc-400 px-3 py-1 rounded-full border border-zinc-700">Enterprise v1.0</span>
     </header>
 
-    <!-- Main Form Container -->
-    <main class="max-w-4xl mx-auto w-full px-4 py-10 flex-grow">
-        <div class="text-center mb-10">
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto w-full px-4 py-8 flex-grow">
+        <div class="text-center mb-8">
             <h1 class="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-3">Personalize Cold Outreach in Seconds</h1>
             <p class="text-zinc-400 text-sm md:text-base">Scrape prospect insights & generate high-converting B2B sales emails instantly.</p>
         </div>
@@ -140,19 +157,23 @@ HTML_TEMPLATE = """
                 </div>
             </div>
 
-            <!-- Right Panel: Output -->
-            <div class="bg-cardBg border border-borderClr rounded-xl p-6 flex flex-col justify-between shadow-2xl relative min-h-[300px]">
+            <!-- Right Panel: Clean Output without Inner Box -->
+            <div class="bg-cardBg border border-borderClr rounded-xl p-6 flex flex-col justify-between shadow-2xl min-h-[320px]">
                 <div>
                     <h2 class="text-sm font-semibold text-zinc-300 uppercase tracking-wider mb-4 flex items-center">
                         <span class="mr-2">⚡</span> AI Generated Output
                     </h2>
-                    <div id="output" class="text-zinc-300 text-sm whitespace-pre-wrap font-mono leading-relaxed bg-black/60 p-4 rounded-lg border border-zinc-800 min-h-[200px]">
+                    
+                    <!-- Clean, natural text display -->
+                    <div id="output" class="text-zinc-200 text-base leading-relaxed whitespace-pre-wrap font-sans">
                         Result will appear here...
                     </div>
                 </div>
-                <button onclick="copyText()" class="mt-4 text-xs text-zinc-400 hover:text-white flex items-center justify-end space-x-1">
-                    <span>📋 Copy Output</span>
-                </button>
+                <div class="mt-6 flex justify-end">
+                    <button onclick="copyText()" class="text-xs text-zinc-400 hover:text-white flex items-center space-x-1">
+                        <span>📋 Copy Output</span>
+                    </button>
+                </div>
             </div>
         </div>
     </main>
@@ -177,7 +198,7 @@ HTML_TEMPLATE = """
 
             btn.disabled = true;
             btn.innerText = 'Scraping & Generating...';
-            output.innerText = 'Analyzing website & writing email...';
+            output.innerHTML = '<div class="dot-flashing"><span></span><span></span><span></span></div>';
 
             try {
                 const response = await fetch('/generate', {
@@ -202,6 +223,7 @@ HTML_TEMPLATE = """
 
         function copyText() {
             const text = document.getElementById('output').innerText;
+            if(!text || text === 'Result will appear here...') return;
             navigator.clipboard.writeText(text);
             alert('Copied to clipboard!');
         }
@@ -212,3 +234,4 @@ HTML_TEMPLATE = """
 
 if __name__ == '__main__':
     app.run(debug=True)
+    
