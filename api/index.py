@@ -63,7 +63,7 @@ def generate():
             # Fallback response for demo mode
             email_output = f"Subject: quick thought on {prospect_url}\n\nHi there,\n\nNoticed your work at {prospect_url}. Most {prospect_role}s are currently struggling to streamline operations.\n\nWe help companies scale faster using {my_offer}.\n\nWorth a brief 5-min chat this week?"
         else:
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            model = genai.GenerativeModel('gemini-2.5-flash')
             response = model.generate_content(prompt)
             email_output = response.text
 
